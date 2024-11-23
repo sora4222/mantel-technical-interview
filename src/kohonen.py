@@ -2,21 +2,25 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 def train(input_data, n_max_iterations, width, height):
-    σ0 = max(width, height) / 2
-    α0 = 0.1
+    radius_initial = max(width, height) / 2
+    lr_initial = 0.1
+
+    # These are per node
     weights = np.random.random((width, height, 3))
-    λ = n_max_iterations / np.log(σ0)
+    time_constant = n_max_iterations / np.log(radius_initial)
+
+
     for t in range(n_max_iterations):
-        σt = σ0 * np.exp(-t/λ)
-        αt = α0 * np.exp(-t/λ)
-        for vt in input_data:
-            bmu = np.argmin(np.sum((weights - vt) ** 2, axis=2))
+        radius = radius_initial * np.exp(-t/time_constant)
+        lr = lr_initial * np.exp(-t/time_constant)
+        for instance_vector in input_data:
+            bmu = np.argmin(np.sum((weights - instance_vector) ** 2, axis=2))
             bmu_x, bmu_y = np.unravel_index(bmu, (width, height))
             for x in range(width):
                 for y in range(height):
-                    di = np.sqrt(((x - bmu_x) ** 2) + ((y - bmu_y) ** 2))
-                    θt = np.exp(-(di ** 2) / (2*(σt ** 2)))
-                    weights[x, y] += αt * θt * (vt - weights[x, y])
+                    distance = np.sqrt(((x - bmu_x) ** 2) + ((y - bmu_y) ** 2))
+                    influence = np.exp(-(distance ** 2) / (2*(radius ** 2)))
+                    weights[x, y] += lr * influence * (instance_vector - weights[x, y])
     return weights
 
 if __name__ == '__main__':
