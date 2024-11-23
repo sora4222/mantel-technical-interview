@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "mantelgroup"
+version = "1.0"
+description = "Mantel Group technical interview"
+package-mode = false
+authors = ["Jesse <25578668+sora4222@users.noreply.github.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+matplotlib = "^3.9.2"
+
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.1.1"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
