@@ -22,15 +22,20 @@ class Kohonen:
         for t in range(n_max_iterations):
             radius = self._radius_initial * np.exp(-t / time_constant)
             lr = self._lr_initial * np.exp(-t / time_constant)
+
             for instance_vector in self._input_data:
                 bmu_x, bmu_y = self._best_matching_unit(instance_vector)
-                # TODO: Convert to vectorised calculations
-                for x in range(self._width):
-                    for y in range(self._height):
-                        distance = np.sqrt(((x - bmu_x) ** 2) + ((y - bmu_y) ** 2))
-                        influence = np.exp(-(distance ** 2) / (2 * (radius ** 2)))
-                        self.weights[x, y] += lr * influence * (instance_vector - self.weights[x, y])
-            # TODO: Add the check for end of training
+                x_coords, y_coords = np.meshgrid(np.arange(self._width), np.arange(self._height), indexing="ij")
+                distances = np.sqrt((x_coords - bmu_x) ** 2 + (y_coords - bmu_y) ** 2)
+                influence = np.exp(-(distances ** 2) / (2 * (radius ** 2)))
+                weight_update = lr * influence[..., np.newaxis] * (instance_vector - self.weights)
+                self.weights += weight_update
+                # Check whether the weights are not changing now
+                # This is a quick method of this, it is per-instance.
+                if np.max(np.absolute(weight_update)) < 0.001:
+                    return
+
+    def predict(self) -> np.ndarray:
         return self.weights
 
     def _best_matching_unit(self, instance_vector: np.ndarray) -> tuple[signedinteger, ...]:
